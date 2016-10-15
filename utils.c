@@ -25,11 +25,12 @@ void copyGrid() {
 void printGrid(){
   int i, j;
   for(i = 0; i < height; i++) {
-    for(j = 0; j < width; j++)
+    for(j = 0; j < width; j++) {
       switch(grid[i][j]) {
         case(DEAD): {printf(". "); break;}
         case(ALIVE): {printf("* "); break;}
       }
+    }
     printf("\n");
   }
 }
