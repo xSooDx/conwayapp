@@ -40,7 +40,7 @@ int getAlive(int i, int j) {
   int k, m;
   for(k = i-1; k <= i+1; k++)
     for(m = j-1; m <= j+1; m++)
-      if(k >= 0 && k <= height-1 && m >= 0 && m <= width-1)
+      if(k != i && m != j && k >= 0 && k <= height-1 && m >= 0 && m <= width-1)
         totalAlive += old_grid[k][m];
   return totalAlive;
 }

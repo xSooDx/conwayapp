@@ -17,7 +17,7 @@ static int **old_grid;
 //This function initializes the grid
 void initGrid(int, int);
 
-//This function shows the gread
+//This function shows the grid
 void printGrid();
 
 //Check adjacent life
