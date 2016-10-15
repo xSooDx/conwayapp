@@ -28,6 +28,6 @@ int main(int argc, char **argv) {
     printGrid();
     usleep(1000000);
     gridStep();
-  //  system("clear");
+    system("clear");
   }
 }
