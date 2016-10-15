@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-static const int WIDTH = 30;
-static const int HEIGHT = 30;
+static const int WIDTH = 10;
+static const int HEIGHT = 10;
 static const int ALIVE = 1;
 static const int DEAD = 0;
 static const int NO_STEPS = 1000;
