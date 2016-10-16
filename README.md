@@ -3,7 +3,7 @@
 ### This projects is Conway's Game of Life serial (and badly written) C implementation
 
 ###### TODOs:
-- [ ] Finish implementing serial bug-free
+- [X] Finish implementing serial bug-free
 - [ ] Think of parallelisation ways
 - [ ] Write parallelisation targets
 
