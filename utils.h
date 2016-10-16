@@ -1,11 +1,11 @@
 #ifndef __UTILS_H__
 #define __UTILS_H__
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
-static const int WIDTH = 30;
-static const int HEIGHT = 30;
+static const int WIDTH = 10;
+static const int HEIGHT = 10;
 static const int ALIVE = 1;
 static const int DEAD = 0;
 static const int NO_STEPS = 1000;
@@ -17,7 +17,7 @@ static int **old_grid;
 //This function initializes the grid
 void initGrid(int, int);
 
-//This function shows the gread
+//This function shows the grid
 void printGrid();
 
 //Check adjacent life

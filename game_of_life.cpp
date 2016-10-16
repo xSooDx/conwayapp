@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
   int step;
   system("clear");
   for(step = 0; step <= NO_STEPS; step++) {
+    printf("%d\n", step);
     printGrid();
     usleep(1000000);
     gridStep();
