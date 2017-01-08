@@ -14,6 +14,9 @@ static int height;
 static int **grid;
 static int **old_grid;
 
+//Used for slave matrixes initialization
+int **initializedMatrix(int);
+
 //This function initializes the grid
 void initGrid(int, int);
 
