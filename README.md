@@ -13,7 +13,7 @@ $ make
 ```
 This will create a `game_of_life` binary in current folder. To run it:
 ``` bash
-$ ./game_of_life
+$ mpirun -np [5, 17, 65] ./game_of_life
 ```
 
 There is also a **clean** rule. To remove binaries and all `.o` files simply run:

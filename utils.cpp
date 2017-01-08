@@ -1,5 +1,11 @@
 #include "utils.h"
 
+int** initializedMatrix(int size) {
+  int **matrix = (int**)calloc(size, sizeof(int*));
+  for(int i = 0; i < size; i++)
+    matrix[i] = (int*)calloc(size, sizeof(int));
+  return matrix;
+}
 //This function initializes the grid
 void initGrid(int h, int w) {
   *&width = w;
