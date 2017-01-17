@@ -60,7 +60,7 @@ __global__ void cellsKernel(char *cells, int height, int width, char *resultCell
 }
 
 void computeCells(char *&cells, int height, int width, char *&resultCells, int threadsCount,
-				  char *borderTop, char *borderRight, char *borderBot, char *borderLeft)
+									char *borderTop, char *borderRight, char *borderBot, char *borderLeft)
 {
 	if ((width * height) % threadsCount != 0) {
 		fprintf(stderr, "%s", "The product of square dimensions must be multiple of the number of threads!\n");
