@@ -1,11 +1,10 @@
 #include <cstdio>
-#include <iostream>
 #include "cuda_runtime.h"
 #include <device_launch_parameters.h>
 
 using namespace std;
 
-__global__ void cellsKernel(char *cells, int height, int width, char *resultCells, 
+__global__ void cellsKernel(char *cells, int height, int width, char *resultCells,
 							char *borderTop, char *borderRight, char *bordertBot, char *borderLeft)
 {
 	int worldSize = height * width;
@@ -16,8 +15,8 @@ __global__ void cellsKernel(char *cells, int height, int width, char *resultCell
 	int N, NE, E, SE, S, SW, W, NW;
 
 	for (int cellId = blockIdx.x * blockDim.x + threadIdx.x; cellId < worldSize; cellId += blockDim.x * gridDim.x) {
-		currentCellY = cellId % width; // indexul celulei de pe randul curent din **matrice**
-		currentCellX = cellId - currentCellY; // numarul total de celule pana la randul curent din **matrice**
+		currentCellY = cellId % width; // cell's index from the **matrix**
+		currentCellX = cellId - currentCellY; // the number of cells in the **matrix** until the current one
 		currentRow = cellId / width;
 
 		aliveCells = 0;
@@ -55,7 +54,7 @@ __global__ void cellsKernel(char *cells, int height, int width, char *resultCell
 			SW = cells[currentCellX + width + currentCellY - 1];
 
 		aliveCells = N + S + E + W + NE + SE + SW + NW;
-		
+
 		resultCells[currentCellX + currentCellY] = (aliveCells == 3 || (aliveCells == 2 && cells[currentCellX + currentCellY] == 1)) ? 1 : 0;
 	}
 }
@@ -74,90 +73,65 @@ void computeCells(char *&cells, int height, int width, char *&resultCells, int t
 	cellsKernel <<<blocksCount, threadsCount >>> (cells, height, width, resultCells, borderTop, borderRight, borderBot, borderLeft);
 }
 
-int main()
+int* newGeneration(int *h_cells, int *h_borderTop, int *h_borderBot,
+									 int *h_borderRight, int *h_borderLeft, int height, int width)
 {
 	char *d_cells, *d_resultCells, *d_borderTop, *d_borderRight, *d_borderBot, *d_borderLeft;
-	char *h_cells = (char*)calloc(100, sizeof(char));
 
-	char *h_borderTop = (char*)calloc(11, sizeof(char));
-	char *h_borderBot = (char*)calloc(11, sizeof(char));
-	char *h_borderRight = (char*)calloc(10, sizeof(char));
-	char *h_borderLeft = (char*)calloc(12, sizeof(char));
+	int sizeWorld = height * width;
 
 	size_t cudaStatus;
 
-	h_cells[0] = 1;
-	
-	h_borderTop[0] = 1;
-	h_borderLeft[0] = 1;
-	h_borderLeft[1] = 1;
-
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 10; j++)
-			printf("%d ", h_cells[i * 10 + j]);
-		cout << endl;
-	}
-
-	cudaStatus = cudaMalloc(&d_cells, 100 * sizeof(char));
+	cudaStatus = cudaMalloc(&d_cells, sizeWorld * sizeof(int));
 	if (cudaStatus != cudaSuccess)
 		return 1;
 
-	cudaStatus = cudaMalloc(&d_resultCells, 100 * sizeof(char));
+	cudaStatus = cudaMalloc(&d_resultCells, sizeWorld * sizeof(int));
 	if (cudaStatus != cudaSuccess)
 		return 1;
 
-	cudaStatus = cudaMalloc(&d_borderTop, 100 * sizeof(char));
+	cudaStatus = cudaMalloc(&d_borderTop, (width + 1) * sizeof(int));
 	if (cudaStatus != cudaSuccess)
 		return 1;
 
-	cudaStatus = cudaMalloc(&d_borderRight, 100 * sizeof(char));
+	cudaStatus = cudaMalloc(&d_borderRight, (height) * sizeof(int));
 	if (cudaStatus != cudaSuccess)
 		return 1;
 
-	cudaStatus = cudaMalloc(&d_borderBot, 100 * sizeof(char));
+	cudaStatus = cudaMalloc(&d_borderBot, (width + 1) * sizeof(int));
 	if (cudaStatus != cudaSuccess)
 		return 1;
 
-	cudaStatus = cudaMalloc(&d_borderLeft, 100 * sizeof(char));
+	cudaStatus = cudaMalloc(&d_borderLeft, (height + 2) * sizeof(int));
 	if (cudaStatus != cudaSuccess)
 		return 1;
 
-	cudaStatus = cudaMemcpy(d_cells, h_cells, 100 * sizeof(char), cudaMemcpyHostToDevice);
+	cudaStatus = cudaMemcpy(d_cells, h_cells, sizeWorld * sizeof(int), cudaMemcpyHostToDevice);
 	if (cudaStatus != cudaSuccess)
 		return 1;
 
-	cudaStatus = cudaMemcpy(d_borderTop, h_borderTop, 11, cudaMemcpyHostToDevice);
+	cudaStatus = cudaMemcpy(d_borderTop, h_borderTop, width + 1, cudaMemcpyHostToDevice);
 	if (cudaStatus != cudaSuccess)
 		return 1;
 
-	cudaStatus = cudaMemcpy(d_borderBot, h_borderBot, 11, cudaMemcpyHostToDevice);
+	cudaStatus = cudaMemcpy(d_borderBot, h_borderBot, width + 1, cudaMemcpyHostToDevice);
 	if (cudaStatus != cudaSuccess)
 		return 1;
 
-	cudaStatus = cudaMemcpy(d_borderRight, h_borderRight, 11, cudaMemcpyHostToDevice);
+	cudaStatus = cudaMemcpy(d_borderRight, h_borderRight, height, cudaMemcpyHostToDevice);
 	if (cudaStatus != cudaSuccess)
 		return 1;
 
-	cudaStatus = cudaMemcpy(d_borderLeft, h_borderLeft, 12, cudaMemcpyHostToDevice);
+	cudaStatus = cudaMemcpy(d_borderLeft, h_borderLeft, height + 2, cudaMemcpyHostToDevice);
 	if (cudaStatus != cudaSuccess)
 		return 1;
 
-	computeCells(d_cells, 10, 10, d_resultCells, 100, d_borderTop, d_borderRight, d_borderBot, d_borderLeft);
-	
-	char *h = (char*)calloc(100, sizeof(char));
-	cudaStatus = cudaMemcpy(h, d_resultCells, 100 * sizeof(char), cudaMemcpyDeviceToHost);
+	computeCells(d_cells, height, width, d_resultCells, worldSize, d_borderTop,
+							 d_borderRight, d_borderBot, d_borderLeft);
+
+	cudaStatus = cudaMemcpy(h_cells, d_resultCells, worldSize * sizeof(int), cudaMemcpyDeviceToHost);
 	if (cudaStatus != cudaSuccess)
 		return 1;
-
-	printf("CUDA Error Code: %s\n", cudaGetErrorString(cudaGetLastError()));
-
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 10; j++)
-			printf("%d ", h[i * 10 + j]);
-		cout << endl;
-	}
-
-	system("pause");
 
 	cudaFree(d_cells);
 	cudaFree(d_resultCells);
@@ -166,5 +140,5 @@ int main()
 	cudaFree(d_borderRight);
 	cudaFree(d_borderTop);
 
-	return 0;
+	return h_cells;
 }
