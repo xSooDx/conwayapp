@@ -155,12 +155,12 @@ int main(int argc, char **argv) {
       }
 
       //HERE IS THE PROCESSING!
-
+      if (world_rank == 1) {
       int *h_cells = (int*)calloc(size * size, sizeof(int));
 
       for (int i = 0; i < size; i++)
         for (int j = 0; j < size; j++)
-          h_cells = matrix[i][j];
+          h_cells[i * size + j] = matrix[i][j];
 
       h_cells = newGeneration(h_cells, top_vector, bottom_vector, right_vector,
                               left_vector, size, size);
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
       for (int i = 0; i < size; i++)
         for (int j = 0; j < size; j++)
           matrix[i][j] = h_cells[i * size + j];
-          
+      }
       //END PROCESSING
     }
     MPI_Send(&matrix, size*size, MPI_INT, MASTER, MASTER_MATRIX_SEND, MPI_COMM_WORLD);
