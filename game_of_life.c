@@ -6,14 +6,20 @@
 #define MAX_SIZE 400000
 
 
-void handleParams(int argc, char **argv) {
+void handleParams(int argc, char **argv, int* noSteps) {
+  if(argc < 2) {
+    printf("You need at least one parameter: Number of steps!");
+    exit(1);
+  }
+  *noSteps = atoi(argv[1]);
+
   switch(argc) {
-    case(2): {
-      initGrid(atoi(argv[1]), WIDTH);
+    case(3): {
+      initGrid(atoi(argv[2]), WIDTH);
       break;
     }
-    case(3): {
-      initGrid(atoi(argv[1]), atoi(argv[2]));
+    case(4): {
+      initGrid(atoi(argv[2]), atoi(argv[3]));
       break;
     }
     default: {
@@ -23,6 +29,8 @@ void handleParams(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
+  int noSteps = NO_STEPS;
+  handleParams(argc, argv, &noSteps);
   MPI_Init(NULL, NULL);
 
   int world_size;
@@ -112,7 +120,7 @@ int main(int argc, char **argv) {
       pass_top = 0;
     if(world_rank >= slave_limit*(slave_limit - 1) + 1 && world_rank <= slave_limit*slave_limit)
       pass_bottom = 0;
-    for(int step = 0; step < NO_STEPS; step++) {
+    for(int step = 0; step < noSteps; step++) {
       if(pass_left && pass_top) {
         MPI_Send(&matrix[0][0], 1, MPI_INT, world_rank - slave_limit - 1, CORNER_SEND, MPI_COMM_WORLD);
         MPI_Recv(&left_vector[0], 1, MPI_INT, world_rank - slave_limit - 1, CORNER_SEND, MPI_COMM_WORLD, &status);
@@ -155,6 +163,21 @@ int main(int argc, char **argv) {
       }
 
       //HERE IS THE PROCESSING!
+      if (world_rank == 1) {
+      int *h_cells = (int*)calloc(size * size, sizeof(int));
+
+      for (int i = 0; i < size; i++)
+        for (int j = 0; j < size; j++)
+          h_cells[i * size + j] = matrix[i][j];
+
+      h_cells = newGeneration(h_cells, top_vector, bottom_vector, right_vector,
+                              left_vector, size, size);
+
+      for (int i = 0; i < size; i++)
+        for (int j = 0; j < size; j++)
+          matrix[i][j] = h_cells[i * size + j];
+      }
+      //END PROCESSING
     }
     MPI_Send(&matrix, size*size, MPI_INT, MASTER, MASTER_MATRIX_SEND, MPI_COMM_WORLD);
   }
