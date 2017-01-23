@@ -1,16 +1,19 @@
 build: game_of_life
 
-game_of_life: game_of_life.o utils.o mpi_utils.o
-	mpic++ game_of_life.o utils.o mpi_utils.o -o game_of_life
+game_of_life: game_of_life.o utils.o mpi_utils.o kernel.o
+	mpicc game_of_life.o utils.o mpi_utils.o kernel.o -o game_of_life -lm -L/usr/local/cuda/lib64/ -lcudart -lstdc++ 
 
-game_of_life.o: game_of_life.cpp
-	mpic++ -c game_of_life.cpp -o game_of_life.o
+game_of_life.o: game_of_life.c
+	mpicc -c game_of_life.c -o game_of_life.o
 
-utils.o: utils.cpp utils.h
-	mpic++ -c utils.cpp -o utils.o
+kernel.o: kernel.cu
+	nvcc -c kernel.cu -o kernel.o
 
-mpi_utils.o: mpi_utils.cpp mpi_utils.h
-	mpic++ -c mpi_utils.cpp -o mpi_utils.o
+utils.o: utils.c utils.h
+	mpicc -c utils.c -o utils.o
+
+mpi_utils.o: mpi_utils.c mpi_utils.h
+	mpicc -c mpi_utils.c -o mpi_utils.o
 
 .PHONY: clean
 clean:
